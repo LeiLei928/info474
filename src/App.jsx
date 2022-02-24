@@ -4,11 +4,14 @@ import * as d3 from "d3";
 import './App.css'
 import data from './covid.json'
 import { concat } from "lodash";
+import React, { useState } from "react";
 
 function App() {
 
   const newCase = [];
 
+  
+    
 
 
 
@@ -22,6 +25,7 @@ function App() {
     "Europe",
     "Oceania",
   ];
+  const [selectedContinent, setSelectedContinent] = useState(continent)
   const months = [
     "Jan",
     "Feb",
@@ -83,6 +87,13 @@ function App() {
     .domain(months)
     .range([0, chartSize - margin - margin]);
 
+  
+
+
+  const covid = { Africa: africa, Asia: asia, 'North America': northA, 'South America': southA, Europe: europe, Oceania: oceania };
+
+  
+
   const _lineMaker = line()
     .x((d, i) => {
       return _scaleLine(i);
@@ -91,8 +102,6 @@ function App() {
       return _scaleY(d);
     });
 
-
-  const covid = { Africa: africa, Asia: asia, 'North America': northA, 'South America': southA, Europe: europe, Oceania: oceania };
 
   const month_case = [];
   var sum = 0;
@@ -111,7 +120,6 @@ function App() {
         sum = sum + data[j].new_cases;
       }
     }
-    console.log(year.concat(time.toString()))
     month_case_new.push(sum);
     sum = 0;
 
@@ -188,6 +196,14 @@ function App() {
   const y = d3.scaleLinear()
     .domain(yDomain)
     .range(yRange)
+
+  const handleOnChange = (position) => {
+    const updatedCheckedState = selectedContinent.map((item, index) =>
+      index === position ? !item : item
+    );
+    setSelectedContinent(updatedCheckedState);}
+  
+
 
   return (
     <div className="App" style={{ margin: 20 }}>
@@ -280,6 +296,84 @@ function App() {
       </p>
       <p>I also created another line chart consisting of a monthly summary of new case changes. Based on that chart, I can observe a pattern. New cases seem to decrease at the beginning of the year and then increase from March onwards. It is interesting to consider the reasons for this change. Why do the new cases in Covid-19 trend to increase again after each decrease (The growth of covid seems never-ending). If the pattern is consistent for 2022, new cases should reach a high point in January and begin to decrease in February.</p>
 
+      <h1>Covid-19 New Cases 2021 Interactive Analysis</h1>
+      <div>
+        {continent.map((city, i) => {
+          console.log(selectedContinent[i])
+          return (
+            <>
+              <input
+                key={i}
+                type="checkbox"
+                id={city}
+                name={city}
+                checked={selectedContinent[i]}
+                onChange={() => handleOnChange(i)}
+                
+              />
+              <label style={{ marginRight: 15 }}>{city}</label>
+            </>
+          );
+        })}
+      </div>
+
+      <div style={{ display: "flex" }}>
+        <svg
+          width={chartSize + legendPadding}
+          height={chartSize}
+          key={"a"}
+        >
+          <AxisLeft strokeWidth={0} left={margin} scale={_scaleY} />
+          <AxisBottom
+            strokeWidth={0}
+            top={chartSize - margin}
+            left={margin}
+            scale={_scaleDate}
+            tickValues={months}
+          />
+          <text x="-400" y="40" transform="rotate(-90)" fontSize={20}>
+            Number of New Cases
+          </text>
+          <text x="-400" y="60" transform="rotate(-90)" fontSize={20}>
+            Monthly at 2021
+          </text>
+          {continent.map((city, i) => {
+            
+            return (
+              <path
+                stroke={
+                  selectedContinent[i] === false
+                    ? "rgba(0,0,0,0.1)"
+                    : "rgba(0,0,0,1)"
+                
+                }
+                // fill={"rgba(255,0,0,.3)"}
+                fill={"none"}
+                key={city}
+                d={_lineMaker(covid[city])}
+              />
+            );
+          })}
+          {continent.map((city, i) => {
+            return (
+              <text
+                fill={"black"}
+                style={{
+                  fontSize: 10,
+                }}
+                key={`legend--${city}`}
+                x={chartSize - margin + 5}
+                y={_scaleY(covid[city][11])}
+              >
+                {city}
+              </text>
+            );
+          })}
+        </svg>
+      </div>
+      <p>The format I chose for the visualization is an interactive line chart. The color of the line can be manipulated by checking the checkbox, and the line will be displayed again when the checkbox is re-checked. I chose this type of visualization because the previous line chart with all the folds at once can be a bit overwhelming and it's hard to read the specific continental trends that really interest people. Therefore, adding interactive features helps users to select the continents they are interested in and it is easier for users to compare between specific continents. As an alternative, I considered highlighting the "North American" continent like the previous line chart, but I chose not to do so because the interactive feature already allows the user to highlight the continent of interest. I chose to reduce the color density of the line instead of making it disappear because I wanted to remind the user of the presence of other continents without disturbing the process of viewing the data. For me, I was able to take a closer look at the changes in the differences between Asia and North America. I noticed that the two biggest differences in trends occurred in May and December, as the increase and decrease in Covid new cases number were reversed between the two continents.</p>
+
+
       <h2>strip plot of new cases monthly in 2021 for different continent</h2>
       <div style={{ display: "flex" }}>
         <svg
@@ -305,7 +399,9 @@ function App() {
             numTicks={7}
           />
         </svg>
+        
       </div>
+      
       <h2>histogram of new cases monthly in 2021 for different continent</h2>
       <div style={{ display: "flex" }}>
         <svg width={covidChartWidth} height={covidChartHeight}>
@@ -356,7 +452,6 @@ function App() {
         <svg width={SVGWidth} height={500} margin="100">
           <g y={graphHeight}>
             {cont_case.map(item => {
-              console.log(y(item.newCase));
               return (
                 <rect
                   key={item.continent}
@@ -375,7 +470,6 @@ function App() {
             })}
 
             {cont_case.map(item => {
-              console.log(y(item.newCase));
               return (
                 <text
                   key={'label' + item.continent}
@@ -387,7 +481,6 @@ function App() {
               );
             })}
             {cont_case.map(item => {
-              console.log(y(item.newCase));
               return (
                 <text
                   key={'label' + item.continent}
@@ -421,3 +514,4 @@ function App() {
 }
 
 export default App
+
