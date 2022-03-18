@@ -6,8 +6,8 @@ import MapsExample from "./mapsExampleBasemap";
 
 ReactDOM.render(
   <React.StrictMode>
-    {/* <App /> */}
-    <MapsExample /> 
+    <App />
+    {/* <MapsExample />  */}
     <App /> 
    
   </React.StrictMode>,

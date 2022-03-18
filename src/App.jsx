@@ -5,6 +5,8 @@ import './App.css'
 import data from './covid.json'
 import { concat } from "lodash";
 import React, { useState } from "react";
+import MapsExample from "./mapsExampleBasemap";
+
 
 function App() {
 
@@ -207,6 +209,7 @@ function App() {
 
   return (
     <div className="App" style={{ margin: 20 }}>
+      <MapsExample />
       <h1>Covid-19 New Cases 2021 analysis</h1>
       <h2>line plots of covid-19 new cases change monthly</h2>
       <div style={{ display: "flex" }}>
